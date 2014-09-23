@@ -1,0 +1,78 @@
+---
+output: pdf_document
+---
+# Exploratory Analysis of ToothGrowth Data Set in R
+## Data Analysis Series:  Statistical Inference
+
+
+### Summary
+
+Effects of Vitamin C on tooth growth in guinea pigs was studied using 10 guinea pigs, each receiving three dose levels of Vitamin C (0.5, 1.0, and 2.0 mg) and each of two delivery methods (orange juice and ascorbic acid).  Higher dosage levels significantly predicted greater tooth growth.  Tooth growth was not significantly effected by supplement type.  
+
+```{r readData}
+library(datasets); data = ToothGrowth
+observations <- nrow(data); variables <- ncol(data) 
+names <- names(data); mean.tooth<-mean(data$len)
+```
+
+ 
+
+
+### Exploratory Analysis
+
+
+```{r dataSummary, echo=FALSE}
+low <- subset(data, data$dose==0.5); med <- subset(data, data$dose==1.0); 
+high <- subset(data, data$dose==2.0)
+
+VC <- subset(data, data$supp=="VC"); OJ <- subset(data, data$supp=="OJ")
+lowVC <- subset(VC, VC[,3]==0.5); medVC <- subset(VC, VC[,3]==1.0); highVC <- subset(VC, VC[,3]==2.0)
+lowOJ <- subset(OJ, OJ[,3]==0.5); medOJ <- subset(OJ, OJ[,3]==1.0); 
+highOJ <- subset(OJ, OJ[,3]==2.0)
+
+### Graphs of data by factor and interaction
+par(mfrow=c(2,2))
+plot(density(low$len), col="red", xlim=c(0,40), ylim=c(0,0.15), lwd=2, main="Main Effect: Dosage Amount", xlab="Tooth Length(mm)")
+lines(density(med$len), col="green", lwd=2); lines(density(high$len), col="blue", lwd=2)
+
+plot(density(OJ$len), col="orange", lwd=2, main="Main Effect: Delivery Method", xlab="Tooth Length (mm)") 
+lines(density(VC$len), col="purple", lwd=2)
+
+plot(density(highVC$len), col="blue", lwd=2, xlim=c(0,40), ylim=c(0,0.25), 
+     main="Interaction Effects Within Acid", xlab="Tooth Length (mm)") 
+lines(density(medVC$len), col="green", lwd=2); lines(density(lowVC$len), col="red", lwd=2)
+
+plot(density(highOJ$len), col="blue", lwd=2, xlim=c(0,40), ylim=c(0,0.25),
+     main="Interaction Effects Within Juice", xlab="Tooth Length (mm)") 
+lines(density(medOJ$len), col="green", lwd=2); lines(density(lowOJ$len), col="red", lwd=2)
+```
+
+
+**FIGURE 1:  Factor Level Main Effects and Interaction Effects**  Factor level effects are discernible between dosage levels: *low (0.5ml) = red, medium (1.0ml) = green, high (2.0ml) = blue*, while effects of supplement type: *juice = orange and acid = purple* is less significant.  Dosage level effects are more clearly observed when data is separated by supplement type.  Analysis of Variance and Null Hypothesis Significance Tests will confirm whether significant differences in dosage type and/or delivery method are present.  
+
+
+___________
+
+
+
+
+### Null Hypothesis Significance Testing of Factor Level Effects 
+```{r NHST, results='hide', error=TRUE}
+t.test(data$len, data$dose)
+t.mainDose<-17.8096; p.mainDose<-"0+"; CI.mainDose<-c(15.66453, 18.813333, 19.62881)
+t.test(data$len, data$supp)
+result.mainSupp<-"STOP: Data are essentially constant"
+t.test(VC$len, VC$dose)
+t.interAcid<-10.4365; p.interAcid<-"0+"; CI.interAcid<-c(12.70257, 16.963333, 18.89076)
+t.test(OJ$len, OJ$dose)
+t.interJuice<-16.0923; p.interJuice<-"0+"; CI.interJuice<-c(17.02071, 20.663333, 21.97262)
+```
+NHST and confidence intervals show that dose level is significant in explaining variation in pooled data (t-statistic=`r t.mainDose` with p-value = 0+), as well as in data factored by supplement type (interaction within acid supplement t-statistic = `r t.interAcid` with p-value = 0+ and interaction within juice supplement t-statistic = `r t.interJuice` with p-value = 0+).  Supplement type alone cannot significantly explain variation in tooth growth (Gosset's t-Test fails when data are essentially constant).
+
+
+### Conclusions and Assumptions
+
+Intake of Vitamin C led to tooth growth in guinea pigs within the study.  Higher dosages of Vitamin C were linked with greater tooth growth when given via both ascorbic acid supplementation or orange juice supplementation.  Supplement type was not a significant factor in explaining differences in tooth growth.  
+
+Assumptions made regarding the data are that tooth growth can not be attributed to any other causes not factored into the study, such as continual tooth growth in this species or additional, uncontrolledietary changes.  Data set is also extremely small and clean, making it an excellent pilot study for more wide-scale experimentation.  
+
